@@ -411,6 +411,8 @@ local function snapshot_smods_state()
 		displayed_hand = SMODS.displayed_hand,
 		displaying_scoring = SMODS.displaying_scoring,
 		current_evaluated_object = SMODS.current_evaluated_object,
+		debuff_text = SMODS.debuff_text,
+		hand_debuff_source = SMODS.hand_debuff_source,
 		context_stack = copy_array_refs(SMODS.context_stack),
 		last_hand = SMODS.last_hand,
 		last_hand_oneshot = SMODS.last_hand_oneshot,
@@ -426,6 +428,8 @@ local function restore_smods_state(snapshot)
 	SMODS.displayed_hand = snapshot.displayed_hand
 	SMODS.displaying_scoring = snapshot.displaying_scoring
 	SMODS.current_evaluated_object = snapshot.current_evaluated_object
+	SMODS.debuff_text = snapshot.debuff_text
+	SMODS.hand_debuff_source = snapshot.hand_debuff_source
 	SMODS.context_stack = copy_array_refs(snapshot.context_stack)
 	SMODS.last_hand = snapshot.last_hand
 	SMODS.last_hand_oneshot = snapshot.last_hand_oneshot
@@ -633,6 +637,9 @@ function CALC.with_state_guard(ctx, fn)
 		block_play = game.blind.block_play,
 		chips_ref = game.blind.chips,
 		chips = deep_copy(game.blind.chips),
+		hands_ref = game.blind.hands,
+		hands = deep_copy(game.blind.hands),
+		only_hand = game.blind.only_hand,
 		disabled = game.blind.disabled,
 	} or nil
 	local g_fields = {
@@ -781,6 +788,12 @@ function CALC.with_state_guard(ctx, fn)
 		else
 			game.blind.chips = blind_fields.chips
 		end
+		if type(blind_fields.hands_ref) == "table" and type(blind_fields.hands) == "table" then
+			game.blind.hands = restore_table(blind_fields.hands_ref, blind_fields.hands)
+		else
+			game.blind.hands = blind_fields.hands
+		end
+		game.blind.only_hand = blind_fields.only_hand
 		game.blind.disabled = blind_fields.disabled
 	end
 	restore_table_fields(game_fields)
